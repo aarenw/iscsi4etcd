@@ -6,7 +6,7 @@ oc debug node/$masternodename
 chroot /host
 cat /etc/iscsi/initiatorname.iscsi
 ```
-2.  config NetAPP iSISC target , control every node only access only one iSISC LUN, ask following information from storage admin
+2.  config NetAPP iSISC target , make sure every node only access  one iSISC LUN, ask following information from storage admin
 - target portal, such as 192.168.0.123:3260
 - target authentication uasername and password
 3. discovery the target on every master node
