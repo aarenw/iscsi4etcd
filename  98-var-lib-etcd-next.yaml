@@ -1,0 +1,28 @@
+apiVersion: machineconfiguration.openshift.io/v1
+kind: MachineConfig
+metadata:
+  labels:
+    machineconfiguration.openshift.io/role: master
+  name: 98-var-lib-etcd
+spec:
+  config:
+    ignition:
+      version: 3.2.0
+    systemd:
+      units:
+      - contents: |
+          [Unit]
+          Description=Mount /dev/<new_disk_name> to /var/lib/etcd
+          Before=remote-fs.target
+          After=iscsi.service var.mount
+
+          [Mount]
+          What=/dev/<new_disk_name>
+          Where=/var/lib/etcd
+          Type=xfs
+          Options=_netdev,x-systemd.requires=iscsi.service,prjquota
+
+          [Install]
+          WantedBy=remote-fs.target
+        enabled: true
+        name: var-lib-etcd.mount

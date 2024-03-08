@@ -1,0 +1,41 @@
+variant: openshift
+version: 4.12.0
+metadata:
+  name: 97-iscsi-master 
+  labels:
+    machineconfiguration.openshift.io/role: master
+systemd:
+  units:
+    - name: iscsidiscovery.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Discovery ISCSI target
+        Before=iscsi.service
+        After=network.target network-online.target iscsid.service iscsiuio.service local-fs.target
+
+        [Service]
+        Type=oneshot
+        RemainAfterExit=yes
+        ExecStartPre=/usr/sbin/setenforce 0
+        ExecStart=/usr/sbin/iscsiadm --mode discovery --type sendtargets --portal $targetportal
+        ExecStartPost=/usr/sbin/setenforce 1
+        TimeoutSec=0
+        
+        [Install]
+        WantedBy=multi-user.target 
+  
+    - name: iscsi.service
+      enabled: true
+    - name: iscsid.service
+      enabled: true
+storage:
+  files:
+    - path: /etc/iscsi/iscsid.conf
+      overwrite: true
+      mode: 0644
+      contents:
+        inline: |
+          node.startup = automatic
+          node.session.auth.username = $username
+          node.session.auth.password = $password
